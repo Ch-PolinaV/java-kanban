@@ -4,12 +4,12 @@ public class Task {
     private int id;
     private String title;
     private String description;
-    private String status;
+    private TaskStatus status;
 
     public Task(String title, String description) {
         this.title = title;
         this.description = description;
-        status = "NEW";
+        status = TaskStatus.NEW;
     }
 
     public int getId() {
@@ -36,11 +36,11 @@ public class Task {
         this.description = description;
     }
 
-    public String getStatus() {
+    public TaskStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(TaskStatus status) {
         this.status = status;
     }
 
