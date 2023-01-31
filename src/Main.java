@@ -76,6 +76,6 @@ public class Main {
         System.out.println(manager.getEpicValue());
         System.out.println(manager.getSubtaskValue());
 
-        System.out.println(manager.printHistory());
+        System.out.println(manager.getHistory());
     }
 }
