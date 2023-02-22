@@ -49,7 +49,13 @@ public class Main {
         manager.deleteTaskById(task2.getId());
         System.out.println(manager.getHistory());
 
-        manager.deleteEpicById(epic1.getId());
+        manager.deleteAllEpics();
+        System.out.println(manager.getHistory());
+
+        manager.deleteAllTasks();
+        System.out.println(manager.getHistory());
+
+        manager.deleteAllSubtasks();
         System.out.println(manager.getHistory());
     }
 }

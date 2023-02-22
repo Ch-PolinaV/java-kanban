@@ -5,9 +5,9 @@ import task.Task;
 import java.util.*;
 
 public class InMemoryHistoryManager implements HistoryManager {
-    private final Map<Integer, Node<Task>> nodeIds = new HashMap<>();
-    private Node<Task> head;
-    private Node<Task> tail;
+    private final Map<Integer, Node> nodeIds = new HashMap<>();
+    private Node head;
+    private Node tail;
 
     @Override
     public void add(Task task) {
@@ -31,19 +31,17 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     private List<Task> getTasks() {
         List<Task> tasksHistory = new ArrayList<>();
-        Node<Task> curNode = head;
-        while (curNode != tail) {
+        Node curNode = head;
+        while (curNode != null) {
             tasksHistory.add(curNode.data);
             curNode = curNode.next;
-            tasksHistory.remove(null);
         }
-        tasksHistory.add(curNode.data);
         return tasksHistory;
     }
 
     private void linkLast(Task task) {
-        Node<Task> oldTail = tail;
-        Node<Task> newNode = new Node<>(null, task, oldTail);
+        Node oldTail = tail;
+        Node newNode = new Node(oldTail, task, null);
         tail = newNode;
         nodeIds.put(task.getId(), newNode);
         if (oldTail == null) {
@@ -53,34 +51,30 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
     }
 
-    private void removeNode(Node<Task> node) {
-        if (node != null) {
-            node.data = null;
-            if (head == node && tail == node) {
-                head = null;
-                tail = null;
-            } else if (head == node) {
-                head = head.next;
-                head.prev = null;
-            } else if (tail == node) {
-                tail = tail.prev;
-                tail.next = null;
-            } else {
-                if (node.prev != null && node.next != null) {
-                    node.prev.next = node.next;
-                    node.next.prev = node.prev;
-                }
-            }
+    private void removeNode(Node node) {
+        if (head == node && tail == node) {
+            head = null;
+            tail = null;
+        } else if (head == node) {
+            head = head.next;
+            head.prev = null;
+        } else if (tail == node) {
+            tail = tail.prev;
+            tail.next = null;
+        } else {
+            node.prev.next = node.next;
+            node.next.prev = node.prev;
         }
     }
 }
 
-class Node<Task> {
-    public Task data;
-    public Node<Task> next;
-    public Node<Task> prev;
 
-    public Node(Node<Task> prev, Task data, Node<Task> next) {
+class Node {
+    public Task data;
+    public Node next;
+    public Node prev;
+
+    public Node(Node prev, Task data, Node next) {
         this.data = data;
         this.next = next;
         this.prev = prev;
