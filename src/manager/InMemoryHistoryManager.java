@@ -28,18 +28,18 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     @Override
-    public List<Task> getHistory() {
-        return getTasks();
+    public List<Integer> getHistory() {
+        return getTaskId();
     }
 
-    private List<Task> getTasks() {
-        List<Task> tasksHistory = new ArrayList<>();
+    private List<Integer> getTaskId() {
+        List<Integer> taskId = new ArrayList<>();
         Node curNode = head;
         while (curNode != null) {
-            tasksHistory.add(curNode.data);
+            taskId.add(curNode.data.getId());
             curNode = curNode.next;
         }
-        return tasksHistory;
+        return taskId;
     }
 
     private void linkLast(Task task) {

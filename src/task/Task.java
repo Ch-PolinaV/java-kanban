@@ -5,11 +5,13 @@ public class Task {
     private String title;
     private String description;
     private TaskStatus status;
+    private final TasksTypes type;
 
     public Task(String title, String description) {
         this.title = title;
         this.description = description;
         status = TaskStatus.NEW;
+        type = TasksTypes.TASK;
     }
 
     public int getId() {
@@ -44,13 +46,12 @@ public class Task {
         this.status = status;
     }
 
+    public int getEpicId() {
+        return 0;
+    }
+
     @Override
     public String toString() {
-        return "Task{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", status='" + status + '\'' +
-                '}';
+        return String.format("%d,%s,%s,%s,%s,%s", id, type, title, status, description, "");
     }
 }

@@ -1,10 +1,16 @@
 package manager;
 
 import exeptions.ManagerSaveException;
-import task.*;
+import task.Epic;
+import task.Subtask;
+import task.Task;
+import task.TaskStatus;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class FileBackedTasksManager extends InMemoryTaskManager implements TaskManager {
     private final File file;
@@ -64,8 +70,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
 
     private static String historyToString(HistoryManager manager) {
         List<String> hist = new ArrayList<>();
-        for (Task task : manager.getHistory()) {
-            hist.add(String.valueOf(task.getId()));
+        for (Integer id : manager.getHistory()) {
+            hist.add(String.valueOf(id));
         }
         return String.join(",", hist);
     }
@@ -113,10 +119,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
             }
 
             String histLine = br.readLine();
-            for (Integer id : historyFromString(histLine)) {
-                manager.historyManager.add(idMap.get(id));
+            if (histLine != null) {
+                for (Integer id : historyFromString(histLine)) {
+                    manager.historyManager.add(idMap.get(id));
+                }
             }
-
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка чтения файла.");
         }
@@ -128,32 +135,28 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         FileBackedTasksManager manager = new FileBackedTasksManager(savedTasks);
 
         Task task1 = new Task("task", "1");
-        Task task2 = new Task("task", "2");
-        manager.addToTaskValue(task1);
-        manager.addToTaskValue(task2);
-
         Epic epic1 = new Epic("epic", "1");
+        Epic epic2 = new Epic("epic", "2");
+        manager.addToTaskValue(task1);
         manager.addToEpicValue(epic1);
+        manager.addToEpicValue(epic2);
 
         Subtask subtask1 = new Subtask("subtask", "1", epic1.getId());
         Subtask subtask2 = new Subtask("subtask", "2", epic1.getId());
-        Subtask subtask3 = new Subtask("subtask", "3", epic1.getId());
         manager.addToSubtaskValue(subtask1);
         manager.addToSubtaskValue(subtask2);
-        manager.addToSubtaskValue(subtask3);
 
-        Epic epic2 = new Epic("epic", "2");
-        manager.addToEpicValue(epic2);
 
         manager.getEpicById(epic1.getId());
         manager.getEpicById(epic2.getId());
-        manager.getTaskById(task2.getId());
-        manager.getSubtaskById(subtask3.getId());
-        manager.getTaskById(task2.getId());
+        manager.getTaskById(task1.getId());
+        manager.getSubtaskById(subtask2.getId());
+        manager.getTaskById(task1.getId());
         manager.getEpicById(epic1.getId());
 
         FileBackedTasksManager manager2 = loadFromFile(new File("src/resources/saved_tasks.csv"));
-        System.out.println(manager2.getTaskValue());
+
+        System.out.println(manager2.getTaskById(1));
         System.out.println(manager2.getEpicValue());
         System.out.println(manager2.getSubtaskValue());
         System.out.println(manager2.getHistory());
