@@ -14,6 +14,14 @@ public class Task {
         type = TasksTypes.TASK;
     }
 
+    public Task(int id, String title, String description, TaskStatus status) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.status = status;
+        type = TasksTypes.TASK;
+    }
+
     public int getId() {
         return id;
     }
@@ -46,8 +54,8 @@ public class Task {
         this.status = status;
     }
 
-    public int getEpicId() {
-        return 0;
+    public TasksTypes getType() {
+        return type;
     }
 
     @Override
