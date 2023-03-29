@@ -2,10 +2,15 @@ package manager;
 
 import task.*;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FileConversions {
+
+    private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy | HH:mm");
     public static Task fromString(String value) {
         String[] values = value.split(",");
         int id = Integer.parseInt(values[0]);
@@ -13,15 +18,17 @@ public class FileConversions {
         String name = values[2];
         TaskStatus status = TaskStatus.valueOf(values[3]);
         String description = values[4];
+        Duration duration = Duration.ofMinutes(Long.parseLong(values[5]));
+        LocalDateTime startTime = LocalDateTime.parse(values[6], FORMATTER);
 
         switch (type) {
             case TASK:
-                return new Task(id, name, description, status);
+                return new Task(id, name, description, status, duration, startTime);
             case EPIC:
-                return new Epic(id, name, description, status);
+                return new Epic(id, name, description, status, duration, startTime);
             case SUBTASK:
-                int epicId = Integer.parseInt(values[5]);
-                return new Subtask(id, name, description, status, epicId);
+                int epicId = Integer.parseInt(values[7]);
+                return new Subtask(id, name, description, status, duration, startTime, epicId);
             default:
                 return null;
         }

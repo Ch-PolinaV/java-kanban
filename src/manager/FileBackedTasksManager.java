@@ -6,6 +6,8 @@ import task.Subtask;
 import task.Task;
 
 import java.io.*;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,7 +22,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
 
-            bw.write("id,type,name,status,description,epic" + "\n");
+            bw.write("id,type,name,status,description,duration,startTime,epic" + "\n");
 
             for (Task task : getTaskValue()) {
                 bw.write(task.toString() + "\n");
@@ -86,18 +88,17 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         File savedTasks = new File("src/resources/saved_tasks.csv");
         FileBackedTasksManager manager = new FileBackedTasksManager(savedTasks);
 
-        Task task1 = new Task("task", "1");
-        Epic epic1 = new Epic("epic", "1");
-        Epic epic2 = new Epic("epic", "2");
+        Task task1 = new Task("task", "1", Duration.ofMinutes(10), LocalDateTime.of(2024, 1, 1, 22, 18));
+        Epic epic1 = new Epic("epic", "1", Duration.ofMinutes(0), LocalDateTime.MAX);
+        Epic epic2 = new Epic("epic", "2", Duration.ofMinutes(0), LocalDateTime.MAX);
         manager.addToTaskValue(task1);
         manager.addToEpicValue(epic1);
         manager.addToEpicValue(epic2);
 
-        Subtask subtask1 = new Subtask("subtask", "1", epic1.getId());
-        Subtask subtask2 = new Subtask("subtask", "2", epic1.getId());
+        Subtask subtask1 = new Subtask("subtask", "1", Duration.ofMinutes(10), LocalDateTime.of(2024, 2, 1, 10, 0), epic1.getId());
+        Subtask subtask2 = new Subtask("subtask", "2", Duration.ofMinutes(10), LocalDateTime.of(2024, 2, 1, 14, 0), epic1.getId());
         manager.addToSubtaskValue(subtask1);
         manager.addToSubtaskValue(subtask2);
-
 
         manager.getEpicById(epic1.getId());
         manager.getEpicById(epic2.getId());
@@ -105,6 +106,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         manager.getSubtaskById(subtask2.getId());
         manager.getTaskById(task1.getId());
         manager.getEpicById(epic1.getId());
+        System.out.println(task1.getEndTime());
+        System.out.println(subtask1.getEndTime());
 
         FileBackedTasksManager manager2 = loadFromFile(new File("src/resources/saved_tasks.csv"));
 
@@ -112,6 +115,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         System.out.println(manager2.getEpicValue());
         System.out.println(manager2.getSubtaskValue());
         System.out.println(manager2.getHistory());
+        System.out.println(epic1.getEndTime());
     }
 
     @Override
