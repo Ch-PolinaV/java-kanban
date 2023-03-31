@@ -1,11 +1,11 @@
 package manager;
 
+import exeptions.TimeIntersectionException;
 import task.Epic;
 import task.Subtask;
 import task.Task;
 import task.TaskStatus;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -22,7 +22,7 @@ public class InMemoryTaskManager implements TaskManager {
         int taskId = createId();
         task.setId(taskId);
         taskValue.put(taskId, task);
-        sortedTasksByStartTime.add(task);
+        checkIntersectionByTimeBeforeAdd(task);
     }
 
     @Override
@@ -38,11 +38,10 @@ public class InMemoryTaskManager implements TaskManager {
             int subtaskId = createId();
             subtask.setId(subtaskId);
             subtaskValue.put(subtaskId, subtask);
-            sortedTasksByStartTime.add(subtask);
+            checkIntersectionByTimeBeforeAdd(subtask);
             epicValue.get(subtask.getEpicId()).getSubtaskId().add(subtask.getId());
             updateEpicStatus(subtask.getEpicId());
-            setEpicDuration(subtask.getEpicId());
-            setEpicStartAndEndTime(subtask.getEpicId());
+            setEpicDurationStartTimeAndEndTime(subtask.getEpicId());
         }
     }
 
@@ -113,7 +112,7 @@ public class InMemoryTaskManager implements TaskManager {
         for (Epic epic : epicValue.values()) {
             epic.getSubtaskId().clear();
             updateEpicStatus(epic.getId());
-            epic.setDuration(Duration.ofMinutes(0));
+            epic.setDuration(0);
             epic.setStartTime(LocalDateTime.MAX);
             epic.setEndTime(LocalDateTime.MIN);
         }
@@ -150,12 +149,11 @@ public class InMemoryTaskManager implements TaskManager {
             historyManager.remove(id);
             updateEpicStatus(epicId);
             if (subtaskValue.isEmpty()) {
-                epicValue.get(epicId).setDuration(Duration.ofMinutes(0));
+                epicValue.get(epicId).setDuration(0);
                 epicValue.get(epicId).setStartTime(LocalDateTime.MAX);
                 epicValue.get(epicId).setEndTime(LocalDateTime.MIN);
             } else {
-                setEpicDuration(epicId);
-                setEpicStartAndEndTime(epicId);
+                setEpicDurationStartTimeAndEndTime(epicId);
             }
         }
     }
@@ -164,8 +162,8 @@ public class InMemoryTaskManager implements TaskManager {
     public void updateTaskValue(Task task) {
         if (task != null) {
             if (taskValue.containsKey(task.getId())) {
+                checkIntersectionByTimeBeforeUpdate(task);
                 taskValue.put(task.getId(), task);
-                sortedTasksByStartTime.add(task);
             }
         }
     }
@@ -183,11 +181,10 @@ public class InMemoryTaskManager implements TaskManager {
     public void updateSubtaskValue(Subtask subtask) {
         if (subtask != null) {
             if (subtaskValue.containsKey(subtask.getId())) {
+                checkIntersectionByTimeBeforeUpdate(subtask);
                 subtaskValue.put(subtask.getId(), subtask);
-                sortedTasksByStartTime.add(subtask);
                 updateEpicStatus(subtask.getEpicId());
-                setEpicDuration(subtask.getEpicId());
-                setEpicStartAndEndTime(subtask.getEpicId());
+                setEpicDurationStartTimeAndEndTime(subtask.getEpicId());
             }
         }
     }
@@ -206,20 +203,14 @@ public class InMemoryTaskManager implements TaskManager {
         return id++;
     }
 
-    private void setEpicDuration(int epicId) {
-        Duration epicDuration = Duration.ofMinutes(0);
-        Epic epic = epicValue.get(epicId);
-        for (Integer subtaskId : epic.getSubtaskId()) {
-            epicDuration = epicDuration.plus(subtaskValue.get(subtaskId).getDuration());
-        }
-        epic.setDuration(epicDuration);
-    }
-
-    private void setEpicStartAndEndTime(int epicId) {
+    private void setEpicDurationStartTimeAndEndTime(int epicId) {
+        int epicDuration = 0;
         LocalDateTime epicStartTime = LocalDateTime.MAX;
         LocalDateTime epicEndTime = LocalDateTime.MIN;
         Epic epic = epicValue.get(epicId);
+
         for (Integer subtaskId : epic.getSubtaskId()) {
+            epicDuration = epicDuration + subtaskValue.get(subtaskId).getDuration();
             if (subtaskValue.get(subtaskId).getStartTime().isBefore(epicStartTime)) {
                 epicStartTime = subtaskValue.get(subtaskId).getStartTime();
             }
@@ -227,6 +218,7 @@ public class InMemoryTaskManager implements TaskManager {
                 epicEndTime = subtaskValue.get(subtaskId).getEndTime();
             }
         }
+        epic.setDuration(epicDuration);
         epic.setStartTime(epicStartTime);
         epic.setEndTime(epicEndTime);
     }
@@ -243,6 +235,7 @@ public class InMemoryTaskManager implements TaskManager {
                 statusIsDone++;
             }
         }
+
         Epic epic = epicValue.get(epicId);
 
         if ((statusIsNew == countOfSubtask) || (countOfSubtask == 0)) {
@@ -252,5 +245,56 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             epic.setStatus(TaskStatus.IN_PROGRESS);
         }
+    }
+
+    private void checkIntersectionByTimeBeforeAdd(Task newTask) {
+        try {
+            if (sortedTasksByStartTime.isEmpty() || isTasksIntersectionByTime(newTask)) {
+                sortedTasksByStartTime.add(newTask);
+            }
+        } catch (TimeIntersectionException e) {
+            System.out.print("Ошибка! Невозможно добавить задачу: ");
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void checkIntersectionByTimeBeforeUpdate(Task newTask) {
+        try {
+            for (Task oldTask : sortedTasksByStartTime) {
+                if (oldTask.getId() == newTask.getId()) {
+                    if ((oldTask.getStartTime().isEqual(newTask.getStartTime()))
+                            && (oldTask.getEndTime().isEqual(newTask.getEndTime()))
+                            || (isTasksIntersectionByTime(newTask))) {
+                        sortedTasksByStartTime.remove(oldTask);
+                        sortedTasksByStartTime.add(newTask);
+                        break;
+                    }
+                }
+            }
+        } catch (TimeIntersectionException e) {
+            System.out.print("Ошибка обновления ");
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private boolean isTasksIntersectionByTime(Task newTask) {
+        boolean check = true;
+        LocalDateTime startTime = newTask.getStartTime();
+        LocalDateTime endTime = newTask.getEndTime();
+
+        for (Task task : sortedTasksByStartTime) {
+            LocalDateTime taskStartTime = task.getStartTime();
+            LocalDateTime taskEndTime = task.getEndTime();
+            if (((startTime.isAfter(taskStartTime)) && (startTime.isBefore(taskEndTime)))
+                    || ((endTime.isAfter(taskStartTime)) && (endTime.isBefore(taskEndTime)))
+                    || (startTime.isEqual(taskStartTime)) || (endTime.isEqual(taskEndTime))) {
+                check = false;
+            }
+            if (!check) {
+                throw new TimeIntersectionException(newTask.getTitle() + newTask.getDescription() + "."
+                        + " Пересечение по времени с задачей: " + task.getTitle() + " - id: " + task.getId());
+            }
+        }
+        return check;
     }
 }

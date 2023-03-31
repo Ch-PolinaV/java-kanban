@@ -2,7 +2,6 @@ package manager;
 
 import task.*;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -10,7 +9,8 @@ import java.util.List;
 
 public class FileConversions {
 
-    private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy | HH:mm");
+    public final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy | HH:mm");
+
     public static Task fromString(String value) {
         String[] values = value.split(",");
         int id = Integer.parseInt(values[0]);
@@ -18,7 +18,7 @@ public class FileConversions {
         String name = values[2];
         TaskStatus status = TaskStatus.valueOf(values[3]);
         String description = values[4];
-        Duration duration = Duration.ofMinutes(Long.parseLong(values[5]));
+        int duration = Integer.parseInt(values[5]);
         LocalDateTime startTime = LocalDateTime.parse(values[6], FORMATTER);
 
         switch (type) {

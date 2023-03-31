@@ -6,7 +6,6 @@ import task.Subtask;
 import task.Task;
 
 import java.io.*;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -88,15 +87,15 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         File savedTasks = new File("src/resources/saved_tasks.csv");
         FileBackedTasksManager manager = new FileBackedTasksManager(savedTasks);
 
-        Task task1 = new Task("task", "1", Duration.ofMinutes(10), LocalDateTime.of(2024, 1, 1, 22, 18));
-        Epic epic1 = new Epic("epic", "1", Duration.ofMinutes(0), LocalDateTime.MAX);
-        Epic epic2 = new Epic("epic", "2", Duration.ofMinutes(0), LocalDateTime.MAX);
+        Task task1 = new Task("task", "1", 10, LocalDateTime.of(2024, 1, 1, 22, 18));
+        Epic epic1 = new Epic("epic", "1", 0, LocalDateTime.MAX);
+        Epic epic2 = new Epic("epic", "2", 0, LocalDateTime.MAX);
         manager.addToTaskValue(task1);
         manager.addToEpicValue(epic1);
         manager.addToEpicValue(epic2);
 
-        Subtask subtask1 = new Subtask("subtask", "1", Duration.ofMinutes(10), LocalDateTime.of(2024, 2, 1, 10, 0), epic1.getId());
-        Subtask subtask2 = new Subtask("subtask", "2", Duration.ofMinutes(10), LocalDateTime.of(2024, 2, 1, 14, 0), epic1.getId());
+        Subtask subtask1 = new Subtask("subtask", "1", 10, LocalDateTime.of(2024, 2, 1, 10, 0), epic1.getId());
+        Subtask subtask2 = new Subtask("subtask", "2", 10, LocalDateTime.of(2024, 2, 1, 14, 0), epic1.getId());
         manager.addToSubtaskValue(subtask1);
         manager.addToSubtaskValue(subtask2);
 

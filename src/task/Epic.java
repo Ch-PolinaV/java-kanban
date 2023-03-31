@@ -1,24 +1,21 @@
 package task;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static manager.FileConversions.FORMATTER;
+
 public class Epic extends Task {
     private final List<Integer> subtaskId = new ArrayList<>();
-    private final TasksTypes type;
     private LocalDateTime endTime;
 
-    public Epic(String title, String description, Duration duration, LocalDateTime startTime) {
+    public Epic(String title, String description, int duration, LocalDateTime startTime) {
         super(title, description, duration, startTime);
-        type = TasksTypes.EPIC;
     }
 
-    public Epic(int id, String title, String description, TaskStatus status, Duration duration, LocalDateTime startTime) {
+    public Epic(int id, String title, String description, TaskStatus status, int duration, LocalDateTime startTime) {
         super(id, title, description, status, duration, startTime);
-        type = TasksTypes.EPIC;
     }
 
     public List<Integer> getSubtaskId() {
@@ -41,13 +38,13 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
-        return String.format("%d,%s,%s,%s,%s,%s,%s,%s",
+        return String.format("%d,%s,%s,%s,%s,%d,%s,%s",
                 getId(),
-                type,
+                getType(),
                 getTitle(),
                 getStatus(),
                 getDescription(),
-                getDuration().toMinutes(),
-                getStartTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy | HH:mm")), "");
+                getDuration(),
+                getStartTime().format(FORMATTER), "");
     }
 }

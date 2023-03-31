@@ -1,24 +1,21 @@
 package task;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+
+import static manager.FileConversions.FORMATTER;
 
 public class Subtask extends Task {
 
     private final int epicId;
-    private final TasksTypes type;
 
-    public Subtask(String title, String description, Duration duration, LocalDateTime startTime, int epicId) {
+    public Subtask(String title, String description, int duration, LocalDateTime startTime, int epicId) {
         super(title, description, duration, startTime);
         this.epicId = epicId;
-        type = TasksTypes.SUBTASK;
     }
 
-    public Subtask(int id, String title, String description, TaskStatus status, Duration duration, LocalDateTime startTime, int epicId) {
+    public Subtask(int id, String title, String description, TaskStatus status, int duration, LocalDateTime startTime, int epicId) {
         super(id, title, description, status, duration, startTime);
         this.epicId = epicId;
-        type = TasksTypes.SUBTASK;
     }
 
     @Override
@@ -32,14 +29,14 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        return String.format("%d,%s,%s,%s,%s,%s,%s,%s",
+        return String.format("%d,%s,%s,%s,%s,%d,%s,%d",
                 getId(),
-                type,
+                getType(),
                 getTitle(),
                 getStatus(),
                 getDescription(),
-                getDuration().toMinutes(),
-                getStartTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy | HH:mm")),
+                getDuration(),
+                getStartTime().format(FORMATTER),
                 getEpicId());
     }
 }

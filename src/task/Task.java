@@ -1,35 +1,32 @@
 package task;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+
+import static manager.FileConversions.FORMATTER;
 
 public class Task {
     private int id;
     private String title;
     private String description;
     private TaskStatus status;
-    private final TasksTypes type;
-    private Duration duration;
+    private int duration;
     private LocalDateTime startTime;
 
-    public Task(String title, String description, Duration duration, LocalDateTime startTime) {
+    public Task(String title, String description, int duration, LocalDateTime startTime) {
         this.title = title;
         this.description = description;
         this.duration = duration;
         this.startTime = startTime;
         status = TaskStatus.NEW;
-        type = TasksTypes.TASK;
     }
 
-    public Task(int id, String title, String description, TaskStatus status, Duration duration, LocalDateTime startTime) {
+    public Task(int id, String title, String description, TaskStatus status, int duration, LocalDateTime startTime) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.status = status;
         this.duration = duration;
         this.startTime = startTime;
-        type = TasksTypes.TASK;
     }
 
     public int getId() {
@@ -64,11 +61,11 @@ public class Task {
         this.status = status;
     }
 
-    public Duration getDuration() {
+    public int getDuration() {
         return duration;
     }
 
-    public void setDuration(Duration duration) {
+    public void setDuration(int duration) {
         this.duration = duration;
     }
 
@@ -81,23 +78,23 @@ public class Task {
     }
 
     public LocalDateTime getEndTime() {
-        return startTime.plusMinutes(duration.toMinutes());
+        return startTime.plusMinutes(duration);
     }
 
     public TasksTypes getType() {
-        return type;
+        return TasksTypes.TASK;
     }
 
     @Override
     public String toString() {
-        return String.format("%d,%s,%s,%s,%s,%s,%s,%s",
+        return String.format("%d,%s,%s,%s,%s,%d,%s,%s",
                 id,
-                type,
+                getType(),
                 title,
                 status,
                 description,
-                duration.toMinutes(),
-                startTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy | HH:mm")),
+                duration,
+                startTime.format(FORMATTER),
                 "");
     }
 }

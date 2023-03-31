@@ -8,7 +8,6 @@ import task.Epic;
 import task.Subtask;
 import task.TaskStatus;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,10 +22,10 @@ class EpicTest {
     public void beforeEach() {
         manager = Managers.getDefault();
 
-        epic = new Epic("Epic", "1", Duration.ofMinutes(0), LocalDateTime.MAX);
+        epic = new Epic("Epic", "1", 0, LocalDateTime.MAX);
         manager.addToEpicValue(epic);
-        subtask1 = new Subtask("subtask", "1", Duration.ofMinutes(10), LocalDateTime.of(2024, 1, 3, 0, 0), epic.getId());
-        subtask2 = new Subtask("subtask", "2", Duration.ofMinutes(10), LocalDateTime.of(2024, 2, 1, 0, 0), epic.getId());
+        subtask1 = new Subtask("subtask", "1", 10, LocalDateTime.of(2024, 1, 3, 0, 0), epic.getId());
+        subtask2 = new Subtask("subtask", "2", 10, LocalDateTime.of(2024, 2, 1, 0, 0), epic.getId());
         manager.addToSubtaskValue(subtask1);
         manager.addToSubtaskValue(subtask2);
     }

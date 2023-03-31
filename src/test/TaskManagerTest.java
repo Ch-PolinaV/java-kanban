@@ -7,7 +7,6 @@ import task.Epic;
 import task.Subtask;
 import task.Task;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,17 +30,17 @@ abstract class TaskManagerTest<T extends TaskManager> {
     public void createAllTasks() {
         manager = createManager();
 
-        task1 = new Task("task", "1", Duration.ofMinutes(10), LocalDateTime.of(2024, 1, 1, 0, 0));
-        task2 = new Task("task", "2", Duration.ofMinutes(30), LocalDateTime.of(2024, 1, 2, 10, 0));
+        task1 = new Task("task", "1", 10, LocalDateTime.of(2024, 1, 1, 0, 0));
+        task2 = new Task("task", "2", 30, LocalDateTime.of(2024, 1, 2, 10, 0));
         manager.addToTaskValue(task1);
         manager.addToTaskValue(task2);
-        epic1 = new Epic("Epic", "1", Duration.ofMinutes(0), LocalDateTime.MAX);
-        epic2 = new Epic("Epic", "2", Duration.ofMinutes(0), LocalDateTime.MAX);
+        epic1 = new Epic("Epic", "1", 0, LocalDateTime.MAX);
+        epic2 = new Epic("Epic", "2", 0, LocalDateTime.MAX);
         manager.addToEpicValue(epic1);
         manager.addToEpicValue(epic2);
-        subtask1 = new Subtask("subtask", "1", Duration.ofMinutes(10), LocalDateTime.of(2024, 1, 3, 0, 0), epic1.getId());
-        subtask2 = new Subtask("subtask", "2", Duration.ofMinutes(10), LocalDateTime.of(2024, 2, 1, 0, 0), epic1.getId());
-        subtask3 = new Subtask("subtask", "3", Duration.ofMinutes(10), LocalDateTime.of(2024, 3, 1, 0, 0), epic1.getId());
+        subtask1 = new Subtask("subtask", "1", 10, LocalDateTime.of(2024, 1, 3, 0, 0), epic1.getId());
+        subtask2 = new Subtask("subtask", "2", 10, LocalDateTime.of(2024, 2, 1, 0, 0), epic1.getId());
+        subtask3 = new Subtask("subtask", "3", 10, LocalDateTime.of(2024, 3, 1, 0, 0), epic1.getId());
         manager.addToSubtaskValue(subtask1);
         manager.addToSubtaskValue(subtask2);
         manager.addToSubtaskValue(subtask3);
@@ -235,16 +234,16 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void shouldReturnTaskDurationEquals40min() {
-        task1.setDuration(Duration.ofMinutes(40));
+        task1.setDuration(40);
         manager.updateTaskValue(task1);
-        assertEquals(Duration.ofMinutes(40), task1.getDuration());
+        assertEquals(40, task1.getDuration());
     }
 
     @Test
     public void shouldReturnEqualValuesForTaskBeforeAndAfterChange() {
         manager.deleteAllTasks();
         Task task = manager.getTaskById(1);
-        task1.setDuration(Duration.ofMinutes(40));
+        task1.setDuration(40);
         manager.updateTaskValue(task1);
         assertEquals(task, manager.getTaskById(1));
     }
@@ -266,7 +265,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     public void shouldReturnEqualValuesForEpicBeforeAndAfterChange() {
         manager.deleteAllEpics();
         Epic epic = manager.getEpicById(4);
-        epic2.setDuration(Duration.ofMinutes(40));
+        epic2.setDuration(40);
         manager.updateEpicValue(epic2);
         assertEquals(epic, manager.getEpicById(4));
     }
@@ -288,7 +287,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     public void shouldReturnEqualValuesForSubtaskBeforeAndAfterChange() {
         manager.deleteAllSubtasks();
         Subtask subtask = manager.getSubtaskById(6);
-        subtask2.setDuration(Duration.ofMinutes(40));
+        subtask2.setDuration(40);
         manager.updateSubtaskValue(subtask2);
         assertEquals(subtask, manager.getTaskById(6));
     }
@@ -303,7 +302,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     public void shouldReturnChangedListAfterAddingNewTask() {
         List<Task> beforeAddNewTask = manager.getPrioritizedTasks();
         assertEquals(5, beforeAddNewTask.size());
-        Task task3 = new Task("task", "3", Duration.ofMinutes(67), LocalDateTime.of(2023, 6, 4, 10, 0));
+        Task task3 = new Task("task", "3", 67, LocalDateTime.of(2023, 6, 4, 10, 0));
         manager.addToTaskValue(task3);
         List<Task> afterAddNewTask = manager.getPrioritizedTasks();
         assertEquals(6, afterAddNewTask.size());
@@ -315,5 +314,20 @@ abstract class TaskManagerTest<T extends TaskManager> {
         manager.deleteAllTasks();
         manager.deleteAllSubtasks();
         assertEquals(0, manager.getPrioritizedTasks().size());
+    }
+
+    @Test
+    public void shouldDoesNotUpdateSubtask2() {
+        Subtask oldSubtask2 = subtask2;
+        subtask2 = new Subtask(subtask2.getId(), "subtask", "2", subtask2.getStatus(),
+                10, LocalDateTime.of(2024, 1, 3, 0, 0), epic1.getId());
+        manager.updateSubtaskValue(subtask2);
+        List<Task> sortedList = new ArrayList<>(manager.getPrioritizedTasks());
+        for (Task task : sortedList) {
+            if (task.getId() == subtask2.getId()) {
+                subtask2 = (Subtask) task;
+            }
+        }
+        assertEquals(oldSubtask2, subtask2);
     }
 }

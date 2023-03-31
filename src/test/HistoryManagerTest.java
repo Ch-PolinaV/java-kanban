@@ -9,7 +9,6 @@ import task.Epic;
 import task.Subtask;
 import task.Task;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -28,12 +27,12 @@ public class HistoryManagerTest {
         historyManager = Managers.getDefaultHistory();
         taskManager = Managers.getDefault();
 
-        task1 = new Task("task", "id 1", Duration.ofMinutes(10), LocalDateTime.of(2024, 1, 1, 0, 0));
+        task1 = new Task("task", "id 1", 10, LocalDateTime.of(2024, 1, 1, 0, 0));
         taskManager.addToTaskValue(task1);
-        epic2 = new Epic("Epic", "id 2", Duration.ofMinutes(0), LocalDateTime.MAX);
+        epic2 = new Epic("Epic", "id 2", 0, LocalDateTime.MAX);
         taskManager.addToEpicValue(epic2);
-        subtask3 = new Subtask("subtask", "id 3", Duration.ofMinutes(10), LocalDateTime.of(2024, 1, 3, 0, 0), epic2.getId());
-        subtask4 = new Subtask("subtask", "id 4", Duration.ofMinutes(10), LocalDateTime.of(2024, 2, 1, 0, 0), epic2.getId());
+        subtask3 = new Subtask("subtask", "id 3", 10, LocalDateTime.of(2024, 1, 3, 0, 0), epic2.getId());
+        subtask4 = new Subtask("subtask", "id 4", 10, LocalDateTime.of(2024, 2, 1, 0, 0), epic2.getId());
         taskManager.addToSubtaskValue(subtask3);
         taskManager.addToSubtaskValue(subtask4);
     }

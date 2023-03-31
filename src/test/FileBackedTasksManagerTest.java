@@ -8,9 +8,9 @@ import task.Subtask;
 import task.Task;
 
 import java.io.File;
-import java.time.Duration;
 import java.time.LocalDateTime;
 
+import static manager.FileConversions.FORMATTER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager> {
@@ -24,15 +24,15 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
         File savedTasks = new File("src/resources/saved_tasks.csv");
         FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(savedTasks);
 
-        Task task1 = new Task("task", "1", Duration.ofMinutes(10), LocalDateTime.of(2024, 1, 1, 22, 18));
-        Epic epic1 = new Epic("epic", "1", Duration.ofMinutes(0), LocalDateTime.MAX);
-        Epic epic2 = new Epic("epic", "2", Duration.ofMinutes(0), LocalDateTime.MAX);
+        Task task1 = new Task("task", "1", 10, LocalDateTime.of(2024, 1, 1, 22, 18));
+        Epic epic1 = new Epic("epic", "1", 0, LocalDateTime.MAX);
+        Epic epic2 = new Epic("epic", "2", 0, LocalDateTime.MAX);
         fileBackedTasksManager.addToTaskValue(task1);
         fileBackedTasksManager.addToEpicValue(epic1);
         fileBackedTasksManager.addToEpicValue(epic2);
 
-        Subtask subtask1 = new Subtask("subtask", "1", Duration.ofMinutes(10), LocalDateTime.of(2024, 2, 1, 10, 0), epic1.getId());
-        Subtask subtask2 = new Subtask("subtask", "2", Duration.ofMinutes(10), LocalDateTime.of(2024, 2, 1, 14, 0), epic1.getId());
+        Subtask subtask1 = new Subtask("subtask", "1", 10, LocalDateTime.of(2024, 2, 1, 10, 0), epic1.getId());
+        Subtask subtask2 = new Subtask("subtask", "2", 10, LocalDateTime.of(2024, 2, 1, 14, 0), epic1.getId());
         fileBackedTasksManager.addToSubtaskValue(subtask1);
         fileBackedTasksManager.addToSubtaskValue(subtask2);
 
@@ -80,5 +80,19 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
         assertEquals(0, fileBackedManager.getEpicValue().size());
         assertEquals(0, fileBackedManager.getSubtaskValue().size());
         assertEquals(0, fileBackedManager.getHistory().size());
+    }
+
+    @Test
+    public void shouldReturnTask1StartTime() {
+        FileBackedTasksManager fileBackedManager = FileBackedTasksManager.loadFromFile(new File("src/resources/saved_tasks.csv"));
+        LocalDateTime taskStartTime = LocalDateTime.of(2024, 1, 1, 22, 18);
+        taskStartTime.format(FORMATTER);
+        assertEquals(taskStartTime, fileBackedManager.getTaskById(task1.getId()).getStartTime());
+    }
+
+    @Test
+    public void shouldReturnSubtask1Duration() {
+        FileBackedTasksManager fileBackedManager = FileBackedTasksManager.loadFromFile(new File("src/resources/saved_tasks.csv"));
+        assertEquals(10, fileBackedManager.getSubtaskById(subtask1.getId()).getDuration());
     }
 }
