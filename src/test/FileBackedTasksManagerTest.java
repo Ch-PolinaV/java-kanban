@@ -9,6 +9,8 @@ import task.Task;
 
 import java.io.File;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static manager.FileConversions.FORMATTER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,6 +51,19 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
         assertEquals(2, fileBackedManager.getEpicValue().size());
         assertEquals(2, fileBackedManager.getSubtaskValue().size());
         assertEquals(4, fileBackedManager.getHistory().size());
+    }
+
+    // Привет, Сергей! Прошу прощения за невнимательность.
+    // Пока добавляла проверки на новые поля совсем забыла добавить проверку для getPrioritizedTasks().
+
+    @Test
+    public void shouldLoadFromFilePrioritizedTasks() {
+        FileBackedTasksManager fileBackedManager = FileBackedTasksManager.loadFromFile(new File("src/resources/saved_tasks.csv"));
+        List<Task> sortedTasks = new ArrayList<>();
+        sortedTasks.add(fileBackedManager.getTaskById(1));
+        sortedTasks.add(fileBackedManager.getSubtaskById(4));
+        sortedTasks.add(fileBackedManager.getSubtaskById(5));
+        assertEquals(sortedTasks, fileBackedManager.getPrioritizedTasks());
     }
 
     @Test

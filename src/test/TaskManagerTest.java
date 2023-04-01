@@ -278,7 +278,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void shouldReturnSubtaskTittleEqualsSubtask3() {
-        subtask3.setTitle("Subtask3");
+        subtask3 = new Subtask(subtask3.getId(), "Subtask3", "3", subtask2.getStatus(), 10, LocalDateTime.of(2024, 3, 1, 0, 0), epic1.getId());
         manager.updateSubtaskValue(subtask3);
         assertEquals("Subtask3", subtask3.getTitle());
     }
@@ -317,17 +317,16 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    public void shouldDoesNotUpdateSubtask2() {
-        Subtask oldSubtask2 = subtask2;
+    public void shouldDoesNotUpdateSubtask2InPrioritizedTasksList() {
+        Subtask testSubtask = null;
         subtask2 = new Subtask(subtask2.getId(), "subtask", "2", subtask2.getStatus(),
                 10, LocalDateTime.of(2024, 1, 3, 0, 0), epic1.getId());
         manager.updateSubtaskValue(subtask2);
-        List<Task> sortedList = new ArrayList<>(manager.getPrioritizedTasks());
-        for (Task task : sortedList) {
-            if (task.getId() == subtask2.getId()) {
-                subtask2 = (Subtask) task;
+        for (Task task : manager.getPrioritizedTasks()) {
+            if (task.getId() == 6) {
+                testSubtask = (Subtask) task;
             }
         }
-        assertEquals(oldSubtask2, subtask2);
+        assertNull(testSubtask);
     }
 }

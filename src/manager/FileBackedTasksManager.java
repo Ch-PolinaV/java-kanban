@@ -107,6 +107,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         manager.getEpicById(epic1.getId());
         System.out.println(task1.getEndTime());
         System.out.println(subtask1.getEndTime());
+        System.out.println(manager.getPrioritizedTasks());
 
         FileBackedTasksManager manager2 = loadFromFile(new File("src/resources/saved_tasks.csv"));
 
@@ -115,6 +116,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         System.out.println(manager2.getSubtaskValue());
         System.out.println(manager2.getHistory());
         System.out.println(epic1.getEndTime());
+        System.out.println(manager2.getPrioritizedTasks());
     }
 
     @Override

@@ -259,17 +259,19 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private void checkIntersectionByTimeBeforeUpdate(Task newTask) {
+        switch (newTask.getType()) {
+            case TASK:
+                Task oldTask = taskValue.get(newTask.getId());
+                sortedTasksByStartTime.remove(oldTask);
+                break;
+            case SUBTASK:
+                Subtask oldSubtask = subtaskValue.get(newTask.getId());
+                sortedTasksByStartTime.remove(oldSubtask);
+                break;
+        }
         try {
-            for (Task oldTask : sortedTasksByStartTime) {
-                if (oldTask.getId() == newTask.getId()) {
-                    if ((oldTask.getStartTime().isEqual(newTask.getStartTime()))
-                            && (oldTask.getEndTime().isEqual(newTask.getEndTime()))
-                            || (isTasksIntersectionByTime(newTask))) {
-                        sortedTasksByStartTime.remove(oldTask);
-                        sortedTasksByStartTime.add(newTask);
-                        break;
-                    }
-                }
+            if (sortedTasksByStartTime.isEmpty() || isTasksIntersectionByTime(newTask)) {
+                sortedTasksByStartTime.add(newTask);
             }
         } catch (TimeIntersectionException e) {
             System.out.print("Ошибка обновления ");
@@ -279,15 +281,13 @@ public class InMemoryTaskManager implements TaskManager {
 
     private boolean isTasksIntersectionByTime(Task newTask) {
         boolean check = true;
-        LocalDateTime startTime = newTask.getStartTime();
-        LocalDateTime endTime = newTask.getEndTime();
+        LocalDateTime newStartTime = newTask.getStartTime();
+        LocalDateTime newEndTime = newTask.getEndTime();
 
         for (Task task : sortedTasksByStartTime) {
-            LocalDateTime taskStartTime = task.getStartTime();
-            LocalDateTime taskEndTime = task.getEndTime();
-            if (((startTime.isAfter(taskStartTime)) && (startTime.isBefore(taskEndTime)))
-                    || ((endTime.isAfter(taskStartTime)) && (endTime.isBefore(taskEndTime)))
-                    || (startTime.isEqual(taskStartTime)) || (endTime.isEqual(taskEndTime))) {
+            LocalDateTime oldStartTime = task.getStartTime();
+            LocalDateTime oldEndTime = task.getEndTime();
+            if (newStartTime.isBefore(oldEndTime) && newEndTime.isAfter(oldStartTime)) {
                 check = false;
             }
             if (!check) {
