@@ -365,28 +365,4 @@ public class HttpTaskServer {
         h.sendResponseHeaders(200, resp.length);
         h.getResponseBody().write(resp);
     }
-
-    public static void main(String[] args) throws IOException, InterruptedException {
-
-        TaskManager taskManager =Managers.getDefaultTask();
-        HttpTaskServer taskServer = new HttpTaskServer(taskManager);
-        taskServer.start();
-
-        Task task = new Task("task", "1", 10, LocalDateTime.of(2023, 10, 1, 13, 30));
-        Task task2 = new Task("task", "2", 10, LocalDateTime.of(2023, 11, 1, 12, 30));
-        Epic epic = new Epic("epic", "1", 60, LocalDateTime.of(2023, 1, 1, 12, 30));
-
-        taskManager.addToTaskValue(task);
-        taskManager.addToTaskValue(task2);
-        taskManager.addToEpicValue(epic);
-
-        Subtask subtask = new Subtask("Subtask", "1", 20, LocalDateTime.of(2023, 4, 17, 12, 30), epic.getId());
-        taskManager.addToSubtaskValue(subtask);
-
-        taskManager.getTaskById(1);
-        taskManager.getTaskById(2);
-        taskManager.getEpicById(3);
-        System.out.println(taskManager.getHistory());
-        System.out.println(taskManager.getPrioritizedTasks());
-    }
 }

@@ -23,21 +23,8 @@ public class HttpTaskManager extends FileBackedTasksManager {
         key = KEY;
     }
 
-    public HttpTaskManager(String key, String url) {
-        this.key = key;
-        this.url = url;
-    }
-
     @Override
     public void save() throws IOException, InterruptedException {
         new KVTaskClient(url).put(key, gson.toJson(this));
-    }
-
-    public HttpTaskManager load(String url, String key) throws IOException, InterruptedException {
-        String json = new KVTaskClient(url).load(key);
-        if (json.isEmpty()) {
-            return new HttpTaskManager(url);
-        }
-        return gson.fromJson(json, HttpTaskManager.class);
     }
 }
