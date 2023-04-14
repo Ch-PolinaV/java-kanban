@@ -8,6 +8,7 @@ import task.Subtask;
 import task.Task;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +23,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
     }
 
     @BeforeEach
-    public void beforeEach() {
+    public void beforeEach() throws IOException, InterruptedException {
         File savedTasks = new File("src/resources/saved_tasks.csv");
         FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(savedTasks);
 
@@ -53,11 +54,8 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
         assertEquals(4, fileBackedManager.getHistory().size());
     }
 
-    // Привет, Сергей! Прошу прощения за невнимательность.
-    // Пока добавляла проверки на новые поля совсем забыла добавить проверку для getPrioritizedTasks().
-
     @Test
-    public void shouldLoadFromFilePrioritizedTasks() {
+    public void shouldLoadFromFilePrioritizedTasks() throws IOException, InterruptedException {
         FileBackedTasksManager fileBackedManager = FileBackedTasksManager.loadFromFile(new File("src/resources/saved_tasks.csv"));
         List<Task> sortedTasks = new ArrayList<>();
         sortedTasks.add(fileBackedManager.getTaskById(1));
@@ -67,7 +65,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
     }
 
     @Test
-    public void shouldLoadFromFileWithEmptyTasks() {
+    public void shouldLoadFromFileWithEmptyTasks() throws IOException, InterruptedException {
         FileBackedTasksManager fileBackedManager = FileBackedTasksManager.loadFromFile(new File("src/resources/saved_tasks.csv"));
         fileBackedManager.deleteAllTasks();
         assertEquals(0, fileBackedManager.getTaskValue().size());
@@ -77,7 +75,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
     }
 
     @Test
-    public void shouldLoadFromFileWithEmptySubtasks() {
+    public void shouldLoadFromFileWithEmptySubtasks() throws IOException, InterruptedException {
         FileBackedTasksManager fileBackedManager = FileBackedTasksManager.loadFromFile(new File("src/resources/saved_tasks.csv"));
         fileBackedManager.deleteAllSubtasks();
         assertEquals(1, fileBackedManager.getTaskValue().size());
@@ -87,7 +85,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
     }
 
     @Test
-    public void shouldLoadFromFileWithEmptyHistory() {
+    public void shouldLoadFromFileWithEmptyHistory() throws IOException, InterruptedException {
         FileBackedTasksManager fileBackedManager = FileBackedTasksManager.loadFromFile(new File("src/resources/saved_tasks.csv"));
         fileBackedManager.deleteAllTasks();
         fileBackedManager.deleteAllEpics();
@@ -98,7 +96,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
     }
 
     @Test
-    public void shouldReturnTask1StartTime() {
+    public void shouldReturnTask1StartTime() throws IOException, InterruptedException {
         FileBackedTasksManager fileBackedManager = FileBackedTasksManager.loadFromFile(new File("src/resources/saved_tasks.csv"));
         LocalDateTime taskStartTime = LocalDateTime.of(2024, 1, 1, 22, 18);
         taskStartTime.format(FORMATTER);
@@ -106,7 +104,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
     }
 
     @Test
-    public void shouldReturnSubtask1Duration() {
+    public void shouldReturnSubtask1Duration() throws IOException, InterruptedException {
         FileBackedTasksManager fileBackedManager = FileBackedTasksManager.loadFromFile(new File("src/resources/saved_tasks.csv"));
         assertEquals(10, fileBackedManager.getSubtaskById(subtask1.getId()).getDuration());
     }

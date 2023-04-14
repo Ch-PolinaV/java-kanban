@@ -11,13 +11,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
-    private final File file;
+    private File file;
 
     public FileBackedTasksManager(File file) {
         this.file = file;
     }
 
-    private void save() {
+    public FileBackedTasksManager() {}
+
+    public void save() throws IOException, InterruptedException {
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
 
@@ -79,11 +81,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             }
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка чтения файла.");
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
         return manager;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException, InterruptedException {
         File savedTasks = new File("src/resources/saved_tasks.csv");
         FileBackedTasksManager manager = new FileBackedTasksManager(savedTasks);
 
@@ -120,94 +124,94 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void addToTaskValue(Task task) {
+    public void addToTaskValue(Task task) throws IOException, InterruptedException {
         super.addToTaskValue(task);
         save();
     }
 
     @Override
-    public void addToEpicValue(Epic epic) {
+    public void addToEpicValue(Epic epic) throws IOException, InterruptedException {
         super.addToEpicValue(epic);
         save();
     }
 
     @Override
-    public void addToSubtaskValue(Subtask subtask) {
+    public void addToSubtaskValue(Subtask subtask) throws IOException, InterruptedException {
         super.addToSubtaskValue(subtask);
         save();
     }
 
     @Override
-    public Task getTaskById(int id) {
+    public Task getTaskById(int id) throws IOException, InterruptedException {
         Task task = super.getTaskById(id);
         save();
         return task;
     }
 
     @Override
-    public Epic getEpicById(int id) {
+    public Epic getEpicById(int id) throws IOException, InterruptedException {
         Epic epic = super.getEpicById(id);
         save();
         return epic;
     }
 
     @Override
-    public Subtask getSubtaskById(int id) {
+    public Subtask getSubtaskById(int id) throws IOException, InterruptedException {
         Subtask subtask = super.getSubtaskById(id);
         save();
         return subtask;
     }
 
     @Override
-    public void deleteAllTasks() {
+    public void deleteAllTasks() throws IOException, InterruptedException {
         super.deleteAllTasks();
         save();
     }
 
     @Override
-    public void deleteAllEpics() {
+    public void deleteAllEpics() throws IOException, InterruptedException {
         super.deleteAllEpics();
         save();
     }
 
     @Override
-    public void deleteAllSubtasks() {
+    public void deleteAllSubtasks() throws IOException, InterruptedException {
         super.deleteAllSubtasks();
         save();
     }
 
     @Override
-    public void deleteTaskById(int id) {
+    public void deleteTaskById(int id) throws IOException, InterruptedException {
         super.deleteTaskById(id);
         save();
     }
 
     @Override
-    public void deleteEpicById(int id) {
+    public void deleteEpicById(int id) throws IOException, InterruptedException {
         super.deleteEpicById(id);
         save();
     }
 
     @Override
-    public void deleteSubtaskById(int id) {
+    public void deleteSubtaskById(int id) throws IOException, InterruptedException {
         super.deleteSubtaskById(id);
         save();
     }
 
     @Override
-    public void updateTaskValue(Task task) {
+    public void updateTaskValue(Task task) throws IOException, InterruptedException {
         super.updateTaskValue(task);
         save();
     }
 
     @Override
-    public void updateEpicValue(Epic epic) {
+    public void updateEpicValue(Epic epic) throws IOException, InterruptedException {
         super.updateEpicValue(epic);
         save();
     }
 
     @Override
-    public void updateSubtaskValue(Subtask subtask) {
+    public void updateSubtaskValue(Subtask subtask) throws IOException, InterruptedException {
         super.updateSubtaskValue(subtask);
         save();
     }

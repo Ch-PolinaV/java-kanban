@@ -6,6 +6,7 @@ import task.Subtask;
 import task.Task;
 import task.TaskStatus;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -18,7 +19,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected final HistoryManager historyManager = Managers.getDefaultHistory();
 
     @Override
-    public void addToTaskValue(Task task) {
+    public void addToTaskValue(Task task) throws IOException, InterruptedException {
         int taskId = createId();
         task.setId(taskId);
         taskValue.put(taskId, task);
@@ -26,14 +27,14 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void addToEpicValue(Epic epic) {
+    public void addToEpicValue(Epic epic) throws IOException, InterruptedException {
         int epicId = createId();
         epic.setId(epicId);
         epicValue.put(epicId, epic);
     }
 
     @Override
-    public void addToSubtaskValue(Subtask subtask) {
+    public void addToSubtaskValue(Subtask subtask) throws IOException, InterruptedException {
         if (epicValue.get(subtask.getEpicId()) != null) {
             int subtaskId = createId();
             subtask.setId(subtaskId);
@@ -61,28 +62,28 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Task getTaskById(int id) {
+    public Task getTaskById(int id) throws IOException, InterruptedException {
         Task task = taskValue.getOrDefault(id, null);
         historyManager.add(task);
         return task;
     }
 
     @Override
-    public Epic getEpicById(int id) {
+    public Epic getEpicById(int id) throws IOException, InterruptedException {
         Epic epic = epicValue.getOrDefault(id, null);
         historyManager.add(epic);
         return epic;
     }
 
     @Override
-    public Subtask getSubtaskById(int id) {
+    public Subtask getSubtaskById(int id) throws IOException, InterruptedException {
         Subtask subtask = subtaskValue.getOrDefault(id, null);
         historyManager.add(subtask);
         return subtask;
     }
 
     @Override
-    public void deleteAllTasks() {
+    public void deleteAllTasks() throws IOException, InterruptedException {
         for (Integer id : taskValue.keySet()) {
             historyManager.remove(id);
             sortedTasksByStartTime.remove(taskValue.get(id));
@@ -91,9 +92,10 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void deleteAllEpics() {
+    public void deleteAllEpics() throws IOException, InterruptedException {
         for (Integer id : subtaskValue.keySet()) {
             historyManager.remove(id);
+            sortedTasksByStartTime.remove(subtaskValue.get(id));
         }
         for (Integer id : epicValue.keySet()) {
             historyManager.remove(id);
@@ -103,7 +105,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void deleteAllSubtasks() {
+    public void deleteAllSubtasks() throws IOException, InterruptedException {
         for (Integer id : subtaskValue.keySet()) {
             historyManager.remove(id);
             sortedTasksByStartTime.remove(subtaskValue.get(id));
@@ -119,7 +121,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void deleteTaskById(int id) {
+    public void deleteTaskById(int id) throws IOException, InterruptedException {
         if (taskValue.get(id) != null) {
             historyManager.remove(id);
             sortedTasksByStartTime.remove(taskValue.get(id));
@@ -128,7 +130,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void deleteEpicById(int id) {
+    public void deleteEpicById(int id) throws IOException, InterruptedException {
         if (epicValue.get(id) != null) {
             for (Integer subtaskId : epicValue.get(id).getSubtaskId()) {
                 historyManager.remove(subtaskId);
@@ -140,7 +142,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void deleteSubtaskById(int id) {
+    public void deleteSubtaskById(int id) throws IOException, InterruptedException {
         if (subtaskValue.get(id) != null) {
             int epicId = subtaskValue.get(id).getEpicId();
             epicValue.get(epicId).getSubtaskId().remove((Integer) id);
@@ -159,7 +161,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void updateTaskValue(Task task) {
+    public void updateTaskValue(Task task) throws IOException, InterruptedException {
         if (task != null) {
             if (taskValue.containsKey(task.getId())) {
                 checkIntersectionByTimeBeforeUpdate(task);
@@ -169,7 +171,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void updateEpicValue(Epic epic) {
+    public void updateEpicValue(Epic epic) throws IOException, InterruptedException {
         if (epic != null) {
             if (epicValue.containsKey(epic.getId())) {
                 epicValue.put(epic.getId(), epic);
@@ -178,7 +180,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void updateSubtaskValue(Subtask subtask) {
+    public void updateSubtaskValue(Subtask subtask) throws IOException, InterruptedException {
         if (subtask != null) {
             if (subtaskValue.containsKey(subtask.getId())) {
                 checkIntersectionByTimeBeforeUpdate(subtask);

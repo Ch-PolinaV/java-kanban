@@ -8,6 +8,7 @@ import task.Epic;
 import task.Subtask;
 import task.TaskStatus;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -19,8 +20,8 @@ class EpicTest {
     private static Subtask subtask2;
 
     @BeforeEach
-    public void beforeEach() {
-        manager = Managers.getDefault();
+    public void beforeEach() throws IOException, InterruptedException {
+        manager = Managers.getDefaultTask();
 
         epic = new Epic("Epic", "1", 0, LocalDateTime.MAX);
         manager.addToEpicValue(epic);
@@ -31,7 +32,7 @@ class EpicTest {
     }
 
     @Test
-    public void shouldReturnStatusNewForEmptySubtasks() {
+    public void shouldReturnStatusNewForEmptySubtasks() throws IOException, InterruptedException {
         manager.deleteAllSubtasks();
         assertEquals(TaskStatus.NEW, epic.getStatus());
     }
@@ -42,7 +43,7 @@ class EpicTest {
     }
 
     @Test
-    public void shouldReturnStatusDone() {
+    public void shouldReturnStatusDone() throws IOException, InterruptedException {
         subtask1.setStatus(TaskStatus.DONE);
         subtask2.setStatus(TaskStatus.DONE);
         manager.updateSubtaskValue(subtask1);
@@ -51,7 +52,7 @@ class EpicTest {
     }
 
     @Test
-    public void shouldReturnStatusInProgressForSubtaskWithNewAndDoneStatus() {
+    public void shouldReturnStatusInProgressForSubtaskWithNewAndDoneStatus() throws IOException, InterruptedException {
         subtask1.setStatus(TaskStatus.NEW);
         subtask1.setStatus(TaskStatus.DONE);
         manager.updateSubtaskValue(subtask1);
@@ -60,7 +61,7 @@ class EpicTest {
     }
 
     @Test
-    public void shouldReturnStatusInProgress() {
+    public void shouldReturnStatusInProgress() throws IOException, InterruptedException {
         subtask1.setStatus(TaskStatus.IN_PROGRESS);
         subtask1.setStatus(TaskStatus.IN_PROGRESS);
         manager.updateSubtaskValue(subtask1);

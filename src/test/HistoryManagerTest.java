@@ -9,6 +9,7 @@ import task.Epic;
 import task.Subtask;
 import task.Task;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -23,9 +24,9 @@ public class HistoryManagerTest {
     private Subtask subtask4;
 
     @BeforeEach
-    public void beforeEach() {
+    public void beforeEach() throws IOException, InterruptedException {
         historyManager = Managers.getDefaultHistory();
-        taskManager = Managers.getDefault();
+        taskManager = Managers.getDefaultTask();
 
         task1 = new Task("task", "id 1", 10, LocalDateTime.of(2024, 1, 1, 0, 0));
         taskManager.addToTaskValue(task1);
@@ -38,14 +39,14 @@ public class HistoryManagerTest {
     }
 
     @Test
-    public void shouldAddTaskToEmptyHistory() {
+    public void shouldAddTaskToEmptyHistory() throws IOException, InterruptedException {
         assertTrue(historyManager.getHistory().isEmpty());
         taskManager.getEpicById(2);
         assertEquals(1, taskManager.getHistory().size());
     }
 
     @Test
-    public void shouldRemoveRepeatedInHistory() {
+    public void shouldRemoveRepeatedInHistory() throws IOException, InterruptedException {
         taskManager.getTaskById(1);
         taskManager.getEpicById(2);
         taskManager.getSubtaskById(3);
