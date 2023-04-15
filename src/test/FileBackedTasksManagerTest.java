@@ -17,6 +17,9 @@ import static manager.FileConversions.FORMATTER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager> {
+    FileBackedTasksManagerTest() throws IOException {
+    }
+
     @Override
     FileBackedTasksManager createManager() {
         return new FileBackedTasksManager(new File("src/resources/saved_tasks.csv"));

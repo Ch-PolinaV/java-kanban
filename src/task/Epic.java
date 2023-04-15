@@ -7,7 +7,7 @@ import java.util.List;
 import static manager.FileConversions.FORMATTER;
 
 public class Epic extends Task {
-    private final List<Integer> subtaskId = new ArrayList<>();
+    private List<Integer> subtaskId = new ArrayList<>();
     private LocalDateTime endTime;
 
     public Epic(String title, String description, int duration, LocalDateTime startTime) {
@@ -18,8 +18,18 @@ public class Epic extends Task {
         super(id, title, description, status, duration, startTime);
     }
 
+    public Epic(int id, String title, String description, TaskStatus status
+            , int duration, LocalDateTime startTime, List<Integer> subtaskId) {
+        super(id, title, description, status, duration, startTime);
+        this.subtaskId = subtaskId;
+    }
+
     public List<Integer> getSubtaskId() {
         return subtaskId;
+    }
+
+    public void setSubtaskId() {
+        subtaskId.clear();
     }
 
     public void setEndTime(LocalDateTime endTime) {

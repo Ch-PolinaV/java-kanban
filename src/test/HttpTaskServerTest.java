@@ -1,9 +1,8 @@
 package test;
 
-import adapter.LocalDateTimeAdapter;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import manager.Managers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,21 +31,23 @@ public class HttpTaskServerTest {
     private Epic epic;
     private Subtask subtask1;
     private Subtask subtask2;
-    private final Gson gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter()).create();
+    private Gson gson;
     private final HttpClient client = HttpClient.newHttpClient();
 
     @BeforeEach
-    void init() throws IOException {
+    void init() throws IOException, InterruptedException {
+        gson = Managers.getGson();
+
         httpTaskServer = new HttpTaskServer();
         kvServer = new KVServer();
         httpTaskServer.start();
         kvServer.start();
 
-        task1 = new Task("task", "1", 10, LocalDateTime.of(2023, 10, 1, 13, 30));
-        task2 = new Task("task", "2",  10, LocalDateTime.of(2023, 11, 1, 12, 30));
-        epic = new Epic("epic", "1", 60, LocalDateTime.of(2023, 1, 1, 12, 30));
-        subtask1 = new Subtask("Subtask", "1",  20, LocalDateTime.of(2023, 4, 17, 12, 30), 3);
-        subtask2 = new Subtask("Subtask", "1",  20, LocalDateTime.of(2023, 4, 17, 12, 30), 3);
+        task1 = new Task(1, "task", "1", TaskStatus.NEW, 10, LocalDateTime.of(2023, 10, 1, 13, 30));
+        task2 = new Task(2, "task", "2", TaskStatus.NEW, 10, LocalDateTime.of(2023, 11, 1, 12, 30));
+        epic = new Epic(3, "epic", "1", TaskStatus.NEW, 60, LocalDateTime.of(2023, 1, 1, 12, 30), List.of(4, 5));
+        subtask1 = new Subtask(4, "Subtask", "1", TaskStatus.NEW, 20, LocalDateTime.of(2023, 5, 17, 12, 30), 3);
+        subtask2 = new Subtask(5, "Subtask", "1", TaskStatus.NEW, 20, LocalDateTime.of(2023, 4, 17, 12, 30), 3);
     }
 
     @AfterEach
@@ -80,7 +81,7 @@ public class HttpTaskServerTest {
     public void shouldUpdateTask() throws IOException, InterruptedException {
         createRequestPOST(task2, "/task/");
 
-        task2 = new Task(1, "task", "2",  TaskStatus.IN_PROGRESS, 10, LocalDateTime.of(2023, 11, 1, 12, 30));
+        task2 = new Task(1, "task", "2", TaskStatus.IN_PROGRESS, 10, LocalDateTime.of(2023, 11, 1, 12, 30));
         HttpResponse<String> response = createRequestPOST(task1, "/task/");
         assertEquals(200, response.statusCode());
     }
@@ -89,7 +90,7 @@ public class HttpTaskServerTest {
     public void shouldUpdateEpic() throws IOException, InterruptedException {
         createRequestPOST(epic, "/epic/");
 
-        epic = new Epic(1, "epic", "1",  TaskStatus.IN_PROGRESS, 10, LocalDateTime.of(2023, 9, 1, 12, 30));
+        epic = new Epic(1, "epic", "1", TaskStatus.IN_PROGRESS, 10, LocalDateTime.of(2023, 9, 1, 12, 30));
         HttpResponse<String> response = createRequestPOST(task1, "/task/");
         assertEquals(200, response.statusCode());
     }
@@ -99,7 +100,7 @@ public class HttpTaskServerTest {
         createRequestPOST(epic, "/epic/");
         createRequestPOST(subtask1, "/subtask/");
 
-        subtask1 = new Subtask(1, "subtask", "2",  TaskStatus.IN_PROGRESS, 10, LocalDateTime.of(2023, 11, 1, 12, 30), 1);
+        subtask1 = new Subtask(1, "subtask", "2", TaskStatus.IN_PROGRESS, 10, LocalDateTime.of(2023, 11, 1, 12, 30), 1);
         HttpResponse<String> response = createRequestPOST(task1, "/task/");
         assertEquals(200, response.statusCode());
     }
@@ -262,7 +263,7 @@ public class HttpTaskServerTest {
     @Test
     public void shouldGetPrioritizedTasks() throws IOException, InterruptedException {
         task1 = new Task(1, "task", "1", TaskStatus.NEW, 10, LocalDateTime.of(2023, 10, 1, 13, 30));
-        task2 = new Task(2, "task", "2",  TaskStatus.NEW, 10, LocalDateTime.of(2023, 11, 1, 12, 30));
+        task2 = new Task(2, "task", "2", TaskStatus.NEW, 10, LocalDateTime.of(2023, 11, 1, 12, 30));
         createRequestPOST(task1, "/task/");
         createRequestPOST(task2, "/task/");
 
@@ -272,6 +273,19 @@ public class HttpTaskServerTest {
 
         assertEquals(2, tasks.size());
     }
+
+    @Test
+    public void shouldGetEpicSubtasks() throws IOException, InterruptedException {
+        createRequestPOST(epic, "/epic/");
+        createRequestPOST(subtask1, "/subtask/");
+        createRequestPOST(subtask2, "/subtask/");
+
+        HttpResponse<String> response = client.send(createRequestGET("/subtask/epic/?id=3"), HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(2, epic.getSubtaskId().size());
+        assertEquals(200, response.statusCode());
+    }
+
     public HttpRequest createRequestGET(String path) {
         URI uri = URI.create("http://localhost:8080/tasks" + path);
         return HttpRequest.newBuilder()

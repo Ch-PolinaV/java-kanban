@@ -1,8 +1,6 @@
 package server;
 
-import adapter.LocalDateTimeAdapter;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import manager.Managers;
@@ -13,6 +11,9 @@ import task.Task;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
 import java.time.LocalDateTime;
 import java.util.regex.Pattern;
 
@@ -21,11 +22,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class HttpTaskServer {
     private static final int PORT = 8080;
     private final TaskManager manager;
-    private final Gson gson;
+    private final Gson gson = Managers.getGson();
     private final HttpServer server;
 
     public HttpTaskServer(TaskManager manager) throws IOException {
-        gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter()).create();
         this.manager = manager;
         server = HttpServer.create(new InetSocketAddress("localhost", PORT), 0);
         server.createContext("/tasks/task/", this::handleTask);
@@ -33,17 +33,11 @@ public class HttpTaskServer {
         server.createContext("/tasks/subtask/", this::handleSubtask);
         server.createContext("/tasks/", this::handlePrioritizedTask);
         server.createContext("/tasks/history", this::handleHistory);
+        server.createContext("/tasks/subtask/epic/", this::handleEpicSubtask);
     }
 
-    public HttpTaskServer() throws IOException {
-        gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter()).create();
-        manager = Managers.getDefault("http://localhost:8078");
-        server = HttpServer.create(new InetSocketAddress("localhost", PORT), 0);
-        server.createContext("/tasks/task/", this::handleTask);
-        server.createContext("/tasks/epic/", this::handleEpic);
-        server.createContext("/tasks/subtask/", this::handleSubtask);
-        server.createContext("/tasks/", this::handlePrioritizedTask);
-        server.createContext("/tasks/history", this::handleHistory);
+    public HttpTaskServer() throws IOException, InterruptedException {
+        this(Managers.getDefault("http://localhost:8078"));
     }
 
     private void handleTask(HttpExchange httpExchange) {
@@ -336,6 +330,31 @@ public class HttpTaskServer {
         }
     }
 
+    private void handleEpicSubtask(HttpExchange httpExchange) {
+        try {
+            String path = httpExchange.getRequestURI().toString();
+            String requestMethod = httpExchange.getRequestMethod();
+
+            if (Pattern.matches("^/tasks/subtask/epic/.id=\\d+$", path) && requestMethod.equals("GET")) {
+                String pathId = path.replaceFirst("/tasks/subtask/epic/.id=", "");
+                int id = parsePathId(pathId);
+                if (id != -1) {
+                    String response = gson.toJson(manager.getSubtaskByEpic(id));
+                    sendText(httpExchange, response);
+                } else {
+                    System.out.println("Получен некорректный id = " + pathId);
+                    httpExchange.sendResponseHeaders(400, 0);
+                }
+            } else {
+                httpExchange.sendResponseHeaders(405, 0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            httpExchange.close();
+        }
+    }
+
     private int parsePathId(String path) {
         try {
             return Integer.parseInt(path);
@@ -364,5 +383,36 @@ public class HttpTaskServer {
         h.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
         h.sendResponseHeaders(200, resp.length);
         h.getResponseBody().write(resp);
+    }
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+        new KVServer().start();
+        TaskManager manager = Managers.getDefault("http://localhost:8078");
+        HttpTaskServer server = new HttpTaskServer(manager);
+
+
+        Task task1 = new Task("task", "1", 10, LocalDateTime.of(2024, 1, 1, 22, 18));
+        Epic epic1 = new Epic("epic", "1", 0, LocalDateTime.MAX);
+        Epic epic2 = new Epic("epic", "2", 0, LocalDateTime.MAX);
+        manager.addToTaskValue(task1);
+        manager.addToEpicValue(epic2);
+        manager.addToEpicValue(epic1);
+
+        Subtask subtask1 = new Subtask("subtask", "1", 10, LocalDateTime.of(2024, 2, 1, 10, 0), epic1.getId());
+        Subtask subtask2 = new Subtask("subtask", "2", 10, LocalDateTime.of(2024, 2, 1, 14, 0), epic1.getId());
+        manager.addToSubtaskValue(subtask1);
+        manager.addToSubtaskValue(subtask2);
+        System.out.println(manager.getEpicById(3).getSubtaskId());
+        System.out.println(manager.getPrioritizedTasks());
+        server.start();
+
+        URI uri = URI.create("http://localhost:8080/tasks/subtask/epic/.id=3");
+        HttpRequest request = HttpRequest.newBuilder()
+                .GET()
+                .uri(uri)
+                .header("Accept", "application/json")
+                .version(HttpClient.Version.HTTP_1_1)
+                .build();
+        System.out.println(request);
     }
 }

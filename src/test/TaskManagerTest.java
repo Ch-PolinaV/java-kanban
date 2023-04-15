@@ -1,8 +1,10 @@
 package test;
 
 import manager.TaskManager;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import server.KVServer;
 import task.Epic;
 import task.Subtask;
 import task.Task;
@@ -17,6 +19,9 @@ import static org.junit.jupiter.api.Assertions.*;
 abstract class TaskManagerTest<T extends TaskManager> {
     public T manager;
 
+    TaskManagerTest() throws IOException {
+    }
+
     abstract T createManager() throws IOException, InterruptedException;
 
     Task task1;
@@ -26,10 +31,12 @@ abstract class TaskManagerTest<T extends TaskManager> {
     Subtask subtask1;
     Subtask subtask2;
     Subtask subtask3;
+    KVServer server = new KVServer();
 
     @BeforeEach
     public void createAllTasks() throws IOException, InterruptedException {
         manager = createManager();
+        server.start();
 
         task1 = new Task("task", "1", 10, LocalDateTime.of(2024, 1, 1, 0, 0));
         task2 = new Task("task", "2", 30, LocalDateTime.of(2024, 1, 2, 10, 0));
@@ -47,6 +54,10 @@ abstract class TaskManagerTest<T extends TaskManager> {
         manager.addToSubtaskValue(subtask3);
     }
 
+    @AfterEach
+    public void stopServer() {
+        server.stop();
+    }
     @Test
     public void shouldReturnListOfTasksSize2() {
         assertEquals(2, manager.getTaskValue().size());

@@ -17,6 +17,7 @@ public class KVTaskClient {
                 .GET()
                 .uri(uri)
                 .header("Content-Type", "application/json")
+                .version(HttpClient.Version.HTTP_1_1)
                 .build();
 
         HttpClient client = HttpClient.newHttpClient();
